@@ -1,238 +1,73 @@
-# RetroDeck 0.5.1 — Windows Installation Guide
+# RetroDeck Infinity 0.5.1
 
-RetroDeck is a native Windows game-library frontend for organizing ROM folders, configuring emulators, scanning games, and launching them from one interface.
+RetroDeck is a lightweight native Linux emulation frontend. It keeps an independent SQLite library under `~/.local/share/retrodeck/library.sqlite3`, never copies ROMs, and does not download artwork or alter existing emulator configuration.
 
-RetroDeck does not bundle emulators, BIOS files, encryption keys, ROMs, or other copyrighted game components. Install and configure those components separately from their official sources.
+## Install
 
-## Option 1: Install the packaged Windows release
+Build the package with `./build/build-deb.sh`, then install it on Ubuntu/Mint with:
 
-The Windows release is distributed as a folder containing `RetroDeck.exe` and its runtime files, or as a ZIP archive named similar to:
-
-```
-RetroDeck-0.5.1-windows.zip
+```bash
+sudo apt install ./build/retrodeck_0.5.0_amd64.deb
 ```
 
-1. Download the Windows ZIP release.
+The package requires Python 3 and uses the existing PySide6 installation; it deliberately does not depend on the unavailable `python3-pyside6` APT package. Verify it with `python3 -c "import PySide6; print(PySide6.__version__)"`. Launch with `retrodeck` or from the Applications menu. Remove with `sudo apt remove retrodeck`; user data is intentionally preserved.
 
-1. Right-click the ZIP file, choose **Properties**, and select **Unblock** if that option is shown.
+## First run and configuration
 
-1. Extract the entire ZIP to a normal folder such as:
+The **Home** screen reports actual indexed counts, mounted volumes, and targeted emulator detection. Open **Settings** to browse for Cemu, Dolphin, PCSX2 and RetroArch executables, re-detect installations, or back up/restore the SQLite database. The requested defaults are pre-populated but remain editable. Open **Systems → Universal System Picker** to add catalog systems, then **Add folder** to add any number of roots per system. Add each mounted partition separately, then use **Scan selected** or **Rescan enabled folders**. Scanning is recursive, skips common development folders, avoids symlink loops, supports pause/resume/cancel, and retains missing-drive entries as unavailable.
 
-   ```
-   C:\Games\RetroDeck
-   ```
+Double-click a library row to launch. PCSX2 uses `APPIMAGE -- game`; Cemu uses `APPIMAGE -g game`; Dolphin uses `APPIMAGE game`; RetroArch uses `APPIMAGE -L core.so game`. RetroArch core mappings can be added in the database/UI extension point; games without an unambiguous core are rejected rather than silently routed to an unrelated core.
 
-1. Open the extracted `RetroDeck` folder.
+## Testing
 
-1. Double-click `RetroDeck.exe`.
+Run the standard-library tests from the source directory:
 
-Keep the complete extracted folder together. Do not copy only the EXE because the PySide6 runtime and bundled audio assets are stored beside it.
-
-If Windows Defender SmartScreen appears for a locally built or unsigned release, verify that the file came from your trusted release source before choosing **More info → Run anyway**. Do not bypass warnings for an unknown download.
-
-## Option 2: Build the Windows release yourself
-
-Build on Windows 10 or Windows 11 with Python 3.10 or newer.
-
-1. Install Python from [python.org](https://www.python.org/downloads/windows/). During setup, enable **Add Python to PATH**.
-
-1. Open PowerShell.
-
-1. Clone or extract the RetroDeck source tree.
-
-1. Change to the project directory:
-
-   ```
-   cd C:\Path\To\retrodeck
-   ```
-
-1. Run the reproducible build script:
-
-   ```
-   .\build\build-windows.ps1
-   ```
-
-The script installs the Windows build dependencies, runs PyInstaller, copies the application assets, and creates:
-
-```
-dist\RetroDeck\RetroDeck.exe
-dist\RetroDeck-0.5.1-windows.zip
+```bash
+python3 -m unittest discover -s tests -v
 ```
 
-To run the same build through GitHub Actions, use the workflow at:
-
-```
-.github\workflows\windows-release.yml
-```
-
-It runs on a Windows runner and uploads the executable folder and ZIP as build artifacts.
-
-## First launch
-
-On first launch, RetroDeck creates its Windows user data under:
-
-```
-%APPDATA%\RetroDeck
-```
-
-The setup wizard will guide you through:
-
-1. Selecting the systems you use.
-
-1. Selecting one or more ROM folders or additional drives.
-
-1. Detecting installed emulators.
-
-1. Choosing an emulator or RetroArch core for each system.
-
-1. Reviewing the configuration.
-
-1. Running the initial scan.
-
-RetroDeck only scans folders you select. It does not assume that your Windows ROM folders match a Linux installation.
-
-If detection does not find an emulator, select **Settings → Browse** and choose the emulator executable manually.
-
-## Emulator configuration
-
-RetroDeck supports Windows installations of:
-
-- Cemu
-
-- Dolphin
-
-- RPCS3
-
-- Ryujinx
-
-- RetroArch and installed cores
-
-- Other manually configured standalone emulators
-
-Open **Settings** to edit the following values for each emulator:
-
-- Executable path, such as `C:\Emulators\RPCS3\rpcs3.exe`
-
-- Working directory
-
-- Additional command-line arguments
-
-- Launch method
-
-Paths containing spaces are supported. Do not enter Linux paths such as `/data/...` or Linux AppImage filenames in the Windows configuration.
-
-RetroArch cores are discovered as Windows `.dll` files in common RetroArch core folders. You can also add or edit a core manually from the RetroArch Core Manager.
-
-## Library scanning
-
-Use **Systems → Add folder** to assign a ROM folder to a system. You can add multiple folders and drives. Then choose **Scan selected** or use the global scan action.
-
-The scanner:
-
-- Recurses through selected folders.
-
-- Avoids common development and system folders.
-
-- Does not modify ROM files.
-
-- Keeps unavailable folders in the database.
-
-- Marks games as missing if a drive is disconnected.
-
-- Supports pause, resume, and cancel.
-
-## Controller support
-
-RetroDeck supports Linux joystick devices directly and provides keyboard navigation on every platform. On Windows, controller input depends on the controller being exposed through a compatible joystick interface by Windows and its driver.
-
-The keyboard fallback is always available:
-
-- Arrow keys: navigate
-
-- Enter: accept or launch
-
-- Escape: return Home
-
-Mouse navigation remains available as well.
-
-## Music and interface audio
-
-The sidebar provides:
-
-- Ambient music on/off
-
-- Ambient volume control
-
-- Short confirmation feedback for navigation and launch actions
-
-Audio settings are stored in the RetroDeck SQLite database and persist between launches.
-
-## Existing databases and upgrades
-
-RetroDeck upgrades SQLite databases additively. It does not delete or recreate an existing library.
-
-For a safe migration from an earlier installation:
-
-1. Close the older RetroDeck application.
-
-1. Make a backup of the existing database.
-
-1. Copy the database to the Windows RetroDeck data location only if you intentionally want to migrate it:
-
-   ```
-   %APPDATA%\RetroDeck\library.sqlite3
-   ```
-
-1. Start the Windows edition.
-
-1. Review emulator paths in **Settings** because Linux executable paths are not valid on Windows.
-
-1. Re-select Windows ROM folders and Windows emulator executables if necessary.
-
-The database preserves games, favorites, system definitions, setup state, and other compatible settings. Windows-specific paths must be configured separately; RetroDeck never launches Linux AppImages from the Windows adapter.
-
-Before a major migration, use **Settings → Back up database** and keep the backup outside the active data folder.
-
-## Resetting only the Windows configuration
-
-To preserve the existing database, do not delete the RetroDeck data folder. Use the in-app backup, restore, and setup-wizard controls instead.
-
-If you intentionally need a fresh Windows setup, close RetroDeck and rename the data folder:
-
-```
-%APPDATA%\RetroDeck
-```
-
-to something such as:
-
-```
-%APPDATA%\RetroDeck-backup
-```
-
-Starting RetroDeck afterward creates a new database. Keep the renamed folder until you confirm that the new installation works.
+Actual user AppImages and ROM partitions are not present in this build sandbox, so emulator startup against those exact paths remains unverified. The tests cover database migration, multiple roots, recursive scanning, duplicate paths, missing files, safe argument construction, mount discovery, backup/restore, scan controls, ZIP inspection, and paths containing spaces/punctuation. The final package structure can be inspected with `dpkg-deb -c build/retrodeck_0.5.0_amd64.deb`.
 
 ## Troubleshooting
 
-### RetroDeck.exe does not start
+If a drive is unavailable, the folder remains configured and indexed games are marked Missing until the drive is mounted and rescanned. If an emulator is missing or not executable, choose a replacement in Settings. If RetroArch says no core is mapped, configure the core assignment before launching. Unsupported extensions are ignored by the scanner. BIOS, invalid images, and emulator-specific errors are reported by the emulator and are not silently treated as frontend failures.
 
-Confirm that you extracted the complete release folder rather than copying only the EXE. If you built from source, rerun the PowerShell build script from the project root.
+Installed size is the small application/package footprint; the SQLite database and all ROMs remain in their original user locations and are not included in the package.
 
-### An emulator is shown as missing
+## Universal System Picker
 
-Open **Settings**, use **Browse**, and select the actual Windows executable. Do not rely on a guessed installation path.
+The Systems tab now includes a searchable Universal System Picker containing 104 stable-ID catalog entries across Nintendo, Sony, Sega, Atari, NEC, SNK, computers, DOS, arcade, and other platforms. Filter by category or installed-core status, sort by name/manufacturer/category/status, select multiple systems, pin systems, and review aliases, extensions, notes, and detected compatible cores before adding them.
 
-### A game is missing
+RetroArch cores are discovered from the configured RetroArch directory, RetroArch configuration, AppImage-adjacent locations, Flatpak locations, and common Linux directories. Core `.info` metadata is used when present. Missing cores are shown as Missing core or Experimental; RetroDeck does not download or execute arbitrary binaries. Existing Dolphin, PCSX2, and Cemu integrations remain separate and unchanged.
 
-Check whether its drive is mounted and whether the selected ROM folder still exists. Re-add the folder if its drive letter changed, then scan again.
+Upgrade an existing installation with `sudo apt install ./build/retrodeck_0.5.0_amd64.deb`. The migration is additive and preserves existing games, favorites, emulator paths, and directory settings.
 
-### A game does not launch
+## First-launch setup wizard
 
-Verify the emulator executable, working directory, command-line arguments, and RetroArch core mapping. Paths with spaces are supported, but the executable and game file must both exist.
+On a fresh data directory, RetroDeck opens a five-step setup wizard before the Home screen. Choose only the systems you own, assign one or more verified game folders to each system, select a detected RetroArch core or standalone emulator where available, review the configuration, and finish. The selected folders are written to the existing scan configuration and the real background scanner starts after the wizard closes. A system may intentionally remain in **Configure later** mode and will be marked as needing emulator setup rather than being presented as playable.
 
-### Windows cannot access the ROM folder
+The wizard never modifies ROM files. Folder suggestions come only from accessible likely game directories on discovered mounted volumes. Existing setup state is stored in SQLite, so the wizard does not reappear on subsequent launches. To deliberately run it again, use **Settings → Run setup wizard again**; this merges selected systems and paths and does not reset the library. Use **Back up database** before major configuration changes if desired.
 
-Check the folder permissions and confirm that the user running RetroDeck can read the folder. Avoid selecting protected system directories.
+## Infinity visual redesign
 
-## Data and privacy
+The 0.5.0 interface uses a persistent navigation rail, cinematic hero panel, restrained indigo/violet/cyan lighting, metric cards backed by real SQLite and mount data, and higher-contrast library and settings surfaces. The composition takes inspiration from modern game launchers that put a focused library and clear per-game actions first, including the publicly visible VaultLauncher emphasis on organized game details and purposeful action sections. No VaultLauncher artwork, logos, or proprietary assets are included.
 
-RetroDeck stores its library database and local preferences under `%APPDATA%\RetroDeck`. It does not upload ROM files, bundle games, or download restricted emulator components automatically.
+The Game Vault now has a **Box View** that gives every indexed game its own fixed 3D-styled neon case with system badge, title, format, availability state, and a working Play action. It intentionally uses geometric placeholder design rather than downloaded cover art. The sidebar includes an ambient music toggle and volume slider. The package carries an original looping synthwave ambience track and a short UI confirmation tone; audio can be muted and the setting persists locally.
+
+Controller support is built in without requiring Python gamepad packages. Linux joystick devices under `/dev/input/js*` are read when permissions allow, with axis navigation, accept, back, menu, and next actions. Arrow keys, Enter, and Escape provide the same controller-style navigation fallback. A machine without a connected controller continues to work normally with mouse and keyboard.
+
+SQLite upgrades are additive and backward-compatible. The application preserves existing games, paths, favorites, emulator definitions, and settings, creates missing tables, repairs missing columns from early builds, and records schema version 4 through SQLite `user_version`. It does not delete or recreate an older library database.
+
+## Native Windows edition
+
+RetroDeck 0.5.1 includes a native Windows build path that reuses the PySide6 frontend, scanner, catalog, setup wizard, library, and SQLite migrations. Windows data is stored under `%APPDATA%\RetroDeck`, while Linux continues to use `$XDG_DATA_HOME/retrodeck` or `~/.local/share/retrodeck`.
+
+Windows discovery checks logical drives and common user/program locations for Cemu, Dolphin, RPCS3, Ryujinx, RetroArch, and RetroArch cores. Every emulator remains manually configurable through Settings. Windows launch commands use a dedicated adapter with Windows quoting and working-directory rules; Linux AppImage paths and Linux process assumptions are not used by the Windows adapter. Emulator arguments, working directory, and launch method are editable in Settings.
+
+Build the actual Windows executable on Windows PowerShell with Python and PySide6 installed:
+
+```powershell
+.\build\build-windows.ps1
+```
+
+That command produces `dist\RetroDeck\RetroDeck.exe` and `dist\RetroDeck-0.5.1-windows.zip`. A GitHub Actions workflow is also provided at `.github\workflows\windows-release.yml` and runs on `windows-latest`, including a packaged-launch smoke test. This sandbox is Linux and has no Windows runner, so the Windows executable and Windows screenshots must be produced by that Windows runner rather than being falsely represented by the Linux `.deb`.

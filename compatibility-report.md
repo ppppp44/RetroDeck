@@ -1,0 +1,23 @@
+# RetroDeck Infinity 0.5.1 compatibility report
+
+- Application architecture: Python 3 + PySide6 + SQLite; Linux-native desktop entry.
+- Defaults included: Cemu 2.6 AppImage path, Dolphin AppImage path, PCSX2 2.8.2 AppImage path, RetroArch 1.22.2 AppImage path.
+- Catalog: 104 distinct stable system IDs across consoles, handhelds, computers, DOS, arcade, and other platforms.
+- Added: Universal System Picker with search, category filtering, installed-only filtering, sorting, multi-select, pinning, details, aliases, extensions, notes, and detected-core status.
+- Added: additive SQLite tables for catalog entries, enabled systems, core metadata, and system/core mappings. Existing games, favorites, emulator definitions, and directory settings are preserved.
+- Added: RetroArch core discovery from configured RetroArch paths, retroarch.cfg, AppImage-adjacent paths, Flatpak paths, and standard Linux locations. `.info` metadata is used when present.
+- Added: ZIP scanning that inspects archive member extensions without extracting or modifying ROM files.
+- Existing standalone Cemu, Dolphin, and PCSX2 launch integrations remain in place. Wii U, Wii, GameCube, PS2, Dreamcast, and other standalone/experimental entries are labeled accordingly rather than presented as universally installed RetroArch support.
+- No Flycast emulator profile is seeded. Flycast appears only as an experimental catalog/core hint and is never auto-installed or auto-configured.
+- Verified in sandbox: 7 automated tests, 104 unique catalog entries, core discovery from a configured test directory and `.info` file, ZIP scanning, database migration, safe launch argument construction, recursive scanning, duplicate handling, and missing-file handling.
+- Not verified in the sandbox: actual startup of the user's Cemu, Dolphin, PCSX2, RetroArch AppImage, installed core libraries, BIOS files, or mounted ROM partitions because those user-specific paths are unavailable here.
+- Infinity edit pass additionally verified: bounded mount discovery, targeted emulator detection, cooperative scan pause/resume/cancel controls, and SQLite backup/restore.
+- The Debian package no longer depends on `python3-pyside6`; it requires Python 3 and uses the already-installed PySide6 runtime on the target machine.
+- Added a five-step first-launch setup wizard using the existing 104-entry catalog. It persists selected systems, multiple per-system folders, emulator/core mode and choices, supports Configure Later, starts the real scanner after completion, and can be rerun from Settings without resetting the library.
+- Wizard smoke-tested offscreen with all 104 catalog entries and five pages. Actual target-machine emulator/core detection remains dependent on the user's installed paths.
+- Added the premium native UI overhaul: persistent navigation rail, cinematic Home composition, hero panel, metric cards, stronger dark indigo/cyan design system, and improved library surfaces. Rendered screenshots were inspected at 1440×900 for Home, Library, and the setup wizard.
+- VaultLauncher was used only as high-level inspiration for organized game details and focused action hierarchy; no proprietary artwork or branding was copied.
+- Added dependency-free Linux joystick support through `/dev/input/js*`, with axis navigation and mapped accept/back/menu actions. Keyboard arrow, Enter, and Escape fallback controls remain available. No joystick device was present in the sandbox, so physical hardware behavior remains to be verified on the target machine.
+- SQLite migration is now explicitly versioned at `PRAGMA user_version=4`. A regression test opens a legacy database containing only the earlier `games` table, verifies the existing game remains intact, and confirms the additive catalog/setup tables are created.
+- Added explicit Linux and Windows process-launch adapters. Windows supports Cemu, Dolphin, RPCS3, Ryujinx, RetroArch, and configured standalone executables with Windows paths, argument parsing, and working directories. Linux AppImage defaults remain isolated to Linux.
+- Added Windows PyInstaller spec, PowerShell build script, dependency file, and GitHub Actions `windows-latest` workflow. A Windows executable was not claimed as built in this Linux sandbox; the workflow is the reproducible build and packaged smoke-test path.

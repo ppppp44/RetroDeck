@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=RetroDeck
+Comment=Lightweight game library and emulator frontend
+Exec=retrodeck
+Icon=retrodeck
+Terminal=false
+Type=Application
+Categories=Game;Emulator;

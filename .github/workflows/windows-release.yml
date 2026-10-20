@@ -1,0 +1,26 @@
+name: Windows release
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build RetroDeck Windows release
+        shell: pwsh
+        run: .\build\build-windows.ps1
+      - name: Smoke-test packaged executable
+        shell: pwsh
+        run: |
+          $p = Start-Process .\dist\RetroDeck\RetroDeck.exe -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited -and $p.ExitCode -ne 0) { throw "RetroDeck exited with code $($p.ExitCode)" }
+          if (!$p.HasExited) { Stop-Process -Id $p.Id -Force }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RetroDeck-windows
+          path: |
+            dist/RetroDeck/
+            dist/*-windows.zip
